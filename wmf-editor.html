@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMF Editor - Noisy Colouring Book</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+#editor {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 48px 1fr 28px;
+  grid-template-areas: "toolbar toolbar" "sidebar canvas" "infobar infobar";
+  width: 100vw; height: 100vh;
+  background: #1e1e1e; color: #ddd;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+}
+
+/* ── Toolbar ─────────────────────────────── */
+#toolbar {
+  grid-area: toolbar;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 8px;
+  background: #2d2d2d; border-bottom: 1px solid #444;
+  overflow-x: auto; overflow-y: hidden;
+}
+#toolbar::-webkit-scrollbar { height: 4px; }
+#toolbar::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+.palette-btn {
+  width: 30px; height: 30px; border: 2px solid #555;
+  border-radius: 4px; cursor: pointer; flex-shrink: 0;
+}
+.palette-btn.selected { border-color: #fff; box-shadow: 0 0 6px rgba(255,255,255,0.5); }
+.palette-btn:hover { border-color: #aaa; }
+.sep { width: 1px; height: 28px; background: #555; flex-shrink: 0; }
+.tool-btn {
+  padding: 5px 10px; background: #0e639c;
+  border: none; color: #fff; border-radius: 3px;
+  cursor: pointer; font-size: 12px; white-space: nowrap; flex-shrink: 0;
+}
+.tool-btn:hover { background: #1177bb; }
+.tool-btn.danger { background: #c0392b; }
+.tool-btn.danger:hover { background: #e74c3c; }
+#btn-save.saved { background: #27ae60; }
+.toolbar-label { font-size: 11px; color: #999; }
+#active-colour {
+  width: 30px; height: 30px; border: 2px solid #fff; border-radius: 4px;
+}
+
+/* ── Sidebar ─────────────────────────────── */
+#sidebar {
+  grid-area: sidebar;
+  overflow-y: auto; overflow-x: hidden;
+  background: #252526; border-right: 1px solid #444;
+}
+.cat-header {
+  padding: 7px 12px; cursor: pointer;
+  background: #333; font-weight: 600; font-size: 12px;
+  border-bottom: 1px solid #444;
+  user-select: none;
+  display: flex; justify-content: space-between;
+}
+.cat-header:hover { background: #3c3c3c; }
+.cat-header .badge { color: #888; font-weight: normal; }
+.cat-section.collapsed .scene-list { display: none; }
+.cat-section.collapsed .cat-header::before { content: '\25B6 '; font-size: 9px; }
+.cat-section:not(.collapsed) .cat-header::before { content: '\25BC '; font-size: 9px; }
+.scene-btn {
+  display: block; width: 100%;
+  padding: 4px 20px; text-align: left;
+  background: none; border: none; color: #bbb;
+  cursor: pointer; font-size: 12px;
+}
+.scene-btn:hover { background: #2a2d2e; color: #fff; }
+.scene-btn.active { background: #094771; color: #fff; }
+
+/* ── Canvas ──────────────────────────────── */
+#canvas {
+  grid-area: canvas;
+  position: relative;
+  background: #3c3c3c;
+  overflow: hidden;
+  cursor: default;
+}
+#canvas.panning { cursor: grabbing; }
+#svg-container {
+  background: #fff;
+  position: absolute;
+  transform-origin: 0 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#svg-container svg {
+  display: block; width: 100%; height: 100%;
+}
+#placeholder {
+  color: #888; font-size: 16px; text-align: center;
+  padding: 40px;
+}
+#zoom-label {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.6); color: #fff;
+  padding: 2px 8px; border-radius: 3px; font-size: 11px;
+  pointer-events: none;
+}
+
+/* ── Info bar ────────────────────────────── */
+#info-bar {
+  grid-area: infobar;
+  display: flex; align-items: center; gap: 20px;
+  padding: 0 12px;
+  background: #007acc; color: #fff; font-size: 11px;
+  overflow: hidden; white-space: nowrap;
+}
+#info-bar span { flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="editor">
+
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <span class="toolbar-label">Paint:</span>
+    <div id="palette"></div>
+    <div id="active-colour"></div>
+    <div class="sep"></div>
+    <button class="tool-btn" id="btn-save" title="Ctrl+S">Save to DB</button>
+    <button class="tool-btn" id="btn-save-file" title="Export fills as JSON file">Save to File</button>
+    <button class="tool-btn" id="btn-export-all" title="Export ALL DB fills as default-fills.json">Export All</button>
+    <button class="tool-btn" id="btn-load-file" title="Import fills from JSON file">Load File</button>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+    <button class="tool-btn" id="btn-reset" title="Reset to original WMF fills">Reset</button>
+    <button class="tool-btn" id="btn-clear-white" title="Set all shapes to white">Clear All</button>
+    <button class="tool-btn danger" id="btn-clear-db" title="Remove saved fills from DB">Clear DB</button>
+    <div class="sep"></div>
+    <button class="tool-btn" id="btn-undo" title="Ctrl+Z">Undo</button>
+    <div class="sep"></div>
+    <label style="font-size:11px;color:#ccc;cursor:pointer;">
+      <input type="checkbox" id="chk-show-saved" checked> Show saved fills
+    </label>
+    <div class="sep"></div>
+    <button class="tool-btn" id="btn-zoom-in" title="Zoom in (+)">+</button>
+    <button class="tool-btn" id="btn-zoom-out" title="Zoom out (-)">−</button>
+    <button class="tool-btn" id="btn-zoom-fit" title="Fit to canvas (0)">Fit</button>
+  </div>
+
+  <!-- Sidebar -->
+  <div id="sidebar"></div>
+
+  <!-- Canvas -->
+  <div id="canvas">
+    <div id="svg-container">
+      <div id="placeholder">Select a scene from the sidebar</div>
+    </div>
+    <span id="zoom-label">100%</span>
+  </div>
+
+  <!-- Info bar -->
+  <div id="info-bar">
+    <span id="info-path">No scene loaded</span>
+    <span id="info-shapes"></span>
+    <span id="info-hover"></span>
+    <span id="info-db"></span>
+  </div>
+
+</div>
+
+<script src="wmf2svg.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ── IndexedDB (must match noisy.js exactly) ──────────────
+  const DB_NAME = 'NoisyColouringBook';
+  const DB_VERSION = 11;
+  const STORE_NAME = 'sceneFills';
+  let db = null;
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = () => {
+        const d = req.result;
+        if (d.objectStoreNames.contains(STORE_NAME)) {
+          d.deleteObjectStore(STORE_NAME);
+        }
+        d.createObjectStore(STORE_NAME);
+      };
+      req.onsuccess = () => { db = req.result; resolve(db); };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function loadFillsFromDB(key) {
+    if (!db) return Promise.resolve(null);
+    return new Promise(resolve => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  function saveFillsToDB(key, fills) {
+    if (!db) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put(fills, key);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  function deleteFillsFromDB(key) {
+    if (!db) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(key);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  // ── Palette ───────────────────────────────────────────────
+  const PALETTE = [
+    { name: 'Red',     hex: '#ff0000', key: '1' },
+    { name: 'Green',   hex: '#00ff00', key: '2' },
+    { name: 'Blue',    hex: '#0000ff', key: '3' },
+    { name: 'Yellow',  hex: '#ffff00', key: '4' },
+    { name: 'Magenta', hex: '#ff00ff', key: '5' },
+    { name: 'Cyan',    hex: '#00ffff', key: '6' },
+    { name: 'White',   hex: '#ffffff', key: '7' },
+    { name: 'Black',   hex: '#010101', key: '8' }
+  ];
+  let selectedColour = '#ffffff'; // default white for clearing
+
+  function buildPalette() {
+    const container = document.getElementById('palette');
+    container.style.display = 'flex';
+    container.style.gap = '4px';
+    PALETTE.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'palette-btn' + (c.hex === selectedColour ? ' selected' : '');
+      btn.style.background = c.hex;
+      btn.title = `${c.name} (${c.key})`;
+      btn.addEventListener('click', () => selectColour(c.hex));
+      container.appendChild(btn);
+    });
+    updateActiveColour();
+  }
+
+  function selectColour(hex) {
+    selectedColour = hex;
+    document.querySelectorAll('.palette-btn').forEach((btn, i) => {
+      btn.classList.toggle('selected', PALETTE[i].hex === hex);
+    });
+    updateActiveColour();
+  }
+
+  function updateActiveColour() {
+    document.getElementById('active-colour').style.background = selectedColour;
+  }
+
+  // ── Sidebar ───────────────────────────────────────────────
+  let appData = null;
+
+  async function loadActivities() {
+    const resp = await fetch('activities.json?v=2');
+    appData = await resp.json();
+    return appData;
+  }
+
+  function buildSidebar(data) {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.innerHTML = '';
+    for (const cat of data.categories) {
+      const section = document.createElement('div');
+      section.className = 'cat-section';
+
+      const header = document.createElement('div');
+      header.className = 'cat-header';
+      header.innerHTML = `<span>${cat.name}</span><span class="badge">${cat.scenes.length}</span>`;
+      header.addEventListener('click', () => section.classList.toggle('collapsed'));
+      section.appendChild(header);
+
+      const list = document.createElement('div');
+      list.className = 'scene-list';
+      for (const scene of cat.scenes) {
+        const btn = document.createElement('button');
+        btn.className = 'scene-btn';
+        btn.textContent = scene.name;
+        btn.dataset.wmf = scene.wmf;
+        btn.addEventListener('click', () => loadScene(scene.wmf, scene.name));
+        list.appendChild(btn);
+      }
+      section.appendChild(list);
+      sidebar.appendChild(section);
+    }
+  }
+
+  // ── Scene loading ─────────────────────────────────────────
+  const BACKGROUND = '#ffffff';
+  let currentWmfPath = null;
+  let svgEl = null;
+  let originalFills = {};
+  let savedFills = {};
+  let workingFills = {};
+  let undoStack = [];
+  let structuralShapes = new Set();
+
+  async function loadScene(wmfPath, sceneName) {
+    currentWmfPath = wmfPath;
+    undoStack = [];
+
+    const container = document.getElementById('svg-container');
+    container.innerHTML = '';
+
+    try {
+      const svgText = await wmfToSvg(wmfPath);
+      container.innerHTML = svgText;
+      svgEl = container.querySelector('svg');
+      if (!svgEl) {
+        container.innerHTML = '<div id="placeholder">Failed to render SVG</div>';
+        return;
+      }
+
+      svgEl.removeAttribute('width');
+      svgEl.removeAttribute('height');
+      svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      // Record original fills
+      originalFills = {};
+      const allShapes = svgEl.querySelectorAll('[data-shape]');
+      allShapes.forEach(el => {
+        originalFills[el.getAttribute('data-shape')] = el.getAttribute('fill');
+      });
+
+      // Detect structural shapes (same logic as noisy.js)
+      structuralShapes = new Set();
+      const hasStrokeOutlines = svgEl.querySelector(
+        'polyline:not([data-shape]), line:not([data-shape]), ' +
+        'path:not([data-shape])[stroke]:not([stroke="none"])'
+      );
+      if (!hasStrokeOutlines) {
+        const fillCount = {};
+        allShapes.forEach(el => {
+          const f = (el.getAttribute('fill') || '').toLowerCase();
+          if (f !== '#ffffff' && f !== 'white' && f !== BACKGROUND.toLowerCase()) {
+            fillCount[f] = (fillCount[f] || 0) + 1;
+          }
+        });
+        let outlineColour = null, maxCount = 0;
+        for (const [colour, count] of Object.entries(fillCount)) {
+          if (count > maxCount) { maxCount = count; outlineColour = colour; }
+        }
+        allShapes.forEach(el => {
+          const f = (el.getAttribute('fill') || '').toLowerCase();
+          const idx = el.getAttribute('data-shape');
+          if (idx === 'bg') return;
+          if (f === '#000000' || (outlineColour && f === outlineColour)) {
+            structuralShapes.add(idx);
+          }
+        });
+      }
+
+      // Load saved fills
+      savedFills = await loadFillsFromDB(wmfPath) || {};
+
+      // Build working fills
+      const showSaved = document.getElementById('chk-show-saved').checked;
+      workingFills = { ...originalFills };
+      if (showSaved && Object.keys(savedFills).length > 0) {
+        Object.assign(workingFills, savedFills);
+      }
+      applyFills(workingFills);
+
+      // Click handler
+      svgEl.addEventListener('click', onShapeClick);
+
+      // Hover handlers
+      svgEl.addEventListener('mouseover', onShapeHover);
+      svgEl.addEventListener('mouseout', onShapeOut);
+
+      // Update UI
+      const shapeCount = svgEl.querySelectorAll('[data-shape]').length;
+      document.getElementById('info-path').textContent = wmfPath;
+      document.getElementById('info-shapes').textContent = `${shapeCount} shapes`;
+      document.getElementById('info-db').textContent =
+        Object.keys(savedFills).length > 0 ? 'DB: has saved fills' : 'DB: no saved fills';
+
+      // Highlight sidebar
+      document.querySelectorAll('.scene-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.wmf === wmfPath);
+      });
+
+      // Fit the SVG into the canvas
+      fitToCanvas();
+
+    } catch (err) {
+      container.innerHTML = `<div id="placeholder">Error: ${err.message}</div>`;
+      console.error('Failed to load WMF:', err);
+    }
+  }
+
+  function applyFills(fills) {
+    if (!svgEl) return;
+    svgEl.querySelectorAll('[data-shape]').forEach(el => {
+      const idx = el.getAttribute('data-shape');
+      if (fills[idx] !== undefined) el.setAttribute('fill', fills[idx]);
+    });
+  }
+
+  // ── Shape interaction ─────────────────────────────────────
+  function findShape(e) {
+    let target = e.target;
+    while (target && target !== svgEl) {
+      if (target.hasAttribute && target.hasAttribute('data-shape')) return target;
+      target = target.parentElement;
+    }
+    return null;
+  }
+
+  function onShapeClick(e) {
+    if (didDrag) return; // ignore clicks that were drags
+    const shape = findShape(e);
+    if (!shape) return;
+
+    const idx = shape.getAttribute('data-shape');
+    const prevFill = shape.getAttribute('fill');
+
+    undoStack.push({ idx, fill: prevFill });
+
+    shape.setAttribute('fill', selectedColour);
+    workingFills[idx] = selectedColour;
+
+    document.getElementById('info-hover').textContent =
+      `Painted #${idx}: ${prevFill} \u2192 ${selectedColour}`;
+  }
+
+  function onShapeHover(e) {
+    const shape = findShape(e);
+    if (!shape) return;
+    shape.style.filter = 'brightness(0.75)';
+    shape.style.cursor = 'pointer';
+    const idx = shape.getAttribute('data-shape');
+    const fill = shape.getAttribute('fill');
+    const orig = originalFills[idx] || '?';
+    document.getElementById('info-hover').textContent =
+      `#${idx} fill: ${fill} (original: ${orig})`;
+  }
+
+  function onShapeOut(e) {
+    const shape = findShape(e);
+    if (!shape) return;
+    shape.style.filter = '';
+  }
+
+  // ── Toolbar actions ───────────────────────────────────────
+  document.getElementById('btn-save').addEventListener('click', async () => {
+    if (!svgEl || !currentWmfPath) return;
+    const fills = {};
+    svgEl.querySelectorAll('[data-shape]').forEach(el => {
+      fills[el.getAttribute('data-shape')] = el.getAttribute('fill');
+    });
+    await saveFillsToDB(currentWmfPath, fills);
+    savedFills = { ...fills };
+    const btn = document.getElementById('btn-save');
+    btn.textContent = 'Saved!';
+    btn.classList.add('saved');
+    document.getElementById('info-db').textContent = 'DB: has saved fills';
+    setTimeout(() => { btn.textContent = 'Save to DB'; btn.classList.remove('saved'); }, 1500);
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (!svgEl) return;
+    workingFills = { ...originalFills };
+    applyFills(originalFills);
+    undoStack = [];
+    document.getElementById('info-hover').textContent = 'Reset to original WMF fills';
+  });
+
+  document.getElementById('btn-clear-white').addEventListener('click', () => {
+    if (!svgEl) return;
+    let cleared = 0;
+    svgEl.querySelectorAll('[data-shape]').forEach(el => {
+      const idx = el.getAttribute('data-shape');
+      undoStack.push({ idx, fill: el.getAttribute('fill') });
+      el.setAttribute('fill', BACKGROUND);
+      workingFills[idx] = BACKGROUND;
+      cleared++;
+    });
+    document.getElementById('info-hover').textContent = `Cleared all ${cleared} shapes to white`;
+  });
+
+  document.getElementById('btn-clear-db').addEventListener('click', async () => {
+    if (!currentWmfPath) return;
+    if (!confirm(`Remove saved fills for ${currentWmfPath} from IndexedDB?`)) return;
+    await deleteFillsFromDB(currentWmfPath);
+    savedFills = {};
+    document.getElementById('info-db').textContent = 'DB: no saved fills';
+    document.getElementById('info-hover').textContent = 'Cleared saved fills from DB';
+  });
+
+  // Save fills to JSON file
+  document.getElementById('btn-save-file').addEventListener('click', () => {
+    if (!svgEl || !currentWmfPath) return;
+    const fills = {};
+    svgEl.querySelectorAll('[data-shape]').forEach(el => {
+      fills[el.getAttribute('data-shape')] = el.getAttribute('fill');
+    });
+    const exportData = { wmfPath: currentWmfPath, fills };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // Filename from WMF path: wmf/animals/APE.WMF → APE-fills.json
+    const name = currentWmfPath.split('/').pop().replace(/\.wmf$/i, '') + '-fills.json';
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('info-hover').textContent = `Exported ${name}`;
+  });
+
+  // Export ALL DB fills as default-fills.json
+  document.getElementById('btn-export-all').addEventListener('click', async () => {
+    if (!db) return;
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const allFills = {};
+    const req = store.openCursor();
+    await new Promise((resolve) => {
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (cursor) {
+          allFills[cursor.key] = cursor.value;
+          cursor.continue();
+        } else {
+          resolve();
+        }
+      };
+      req.onerror = () => resolve();
+    });
+    const count = Object.keys(allFills).length;
+    if (count === 0) {
+      document.getElementById('info-hover').textContent = 'No fills in DB to export';
+      return;
+    }
+    const blob = new Blob([JSON.stringify(allFills, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'default-fills.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('info-hover').textContent = `Exported ${count} scenes to default-fills.json`;
+  });
+
+  // Load fills from JSON file
+  document.getElementById('btn-load-file').addEventListener('click', () => {
+    document.getElementById('file-input').click();
+  });
+  document.getElementById('file-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+      if (!importData.fills) throw new Error('No fills data in file');
+      // If a scene is loaded and paths match, apply directly
+      if (svgEl && currentWmfPath === importData.wmfPath) {
+        workingFills = { ...originalFills, ...importData.fills };
+        applyFills(workingFills);
+        document.getElementById('info-hover').textContent = `Loaded fills from ${file.name}`;
+      } else if (importData.wmfPath) {
+        // Save to DB for the referenced WMF path
+        await saveFillsToDB(importData.wmfPath, importData.fills);
+        document.getElementById('info-hover').textContent =
+          `Saved fills from ${file.name} to DB for ${importData.wmfPath}`;
+      }
+    } catch (err) {
+      alert('Failed to load file: ' + err.message);
+    }
+    e.target.value = ''; // reset so same file can be re-selected
+  });
+
+  document.getElementById('btn-undo').addEventListener('click', () => {
+    if (!svgEl || undoStack.length === 0) return;
+    const action = undoStack.pop();
+    const el = svgEl.querySelector(`[data-shape="${action.idx}"]`);
+    if (el) {
+      el.setAttribute('fill', action.fill);
+      workingFills[action.idx] = action.fill;
+      document.getElementById('info-hover').textContent =
+        `Undo #${action.idx}: restored ${action.fill}`;
+    }
+  });
+
+  document.getElementById('chk-show-saved').addEventListener('change', (e) => {
+    if (!svgEl) return;
+    workingFills = { ...originalFills };
+    if (e.target.checked && Object.keys(savedFills).length > 0) {
+      Object.assign(workingFills, savedFills);
+    }
+    applyFills(workingFills);
+  });
+
+  // ── Keyboard shortcuts ────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    // Number keys 1-8 select palette colours
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= 8 && !e.ctrlKey && !e.metaKey) {
+      selectColour(PALETTE[num - 1].hex);
+      e.preventDefault();
+      return;
+    }
+    // 0 = fit to canvas
+    if (e.key === '0' && !e.ctrlKey && !e.metaKey) {
+      fitToCanvas();
+      e.preventDefault();
+      return;
+    }
+    // + / = zoom in, - zoom out
+    if ((e.key === '+' || e.key === '=') && !e.ctrlKey && !e.metaKey) {
+      document.getElementById('btn-zoom-in').click();
+      e.preventDefault();
+      return;
+    }
+    if (e.key === '-' && !e.ctrlKey && !e.metaKey) {
+      document.getElementById('btn-zoom-out').click();
+      e.preventDefault();
+      return;
+    }
+    // Ctrl+S save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      document.getElementById('btn-save').click();
+      e.preventDefault();
+      return;
+    }
+    // Ctrl+Z undo
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      document.getElementById('btn-undo').click();
+      e.preventDefault();
+      return;
+    }
+  });
+
+  // ── Zoom & Pan ──────────────────────────────────────────
+  let zoomScale = 1;
+  let panX = 0, panY = 0;
+  let isPanning = false;
+  let panStartX = 0, panStartY = 0;
+
+  const canvasEl = document.getElementById('canvas');
+  const svgContainer = document.getElementById('svg-container');
+  const zoomLabel = document.getElementById('zoom-label');
+
+  function fitToCanvas() {
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const pad = 24;
+    const availW = canvasRect.width - pad;
+    const availH = canvasRect.height - pad;
+    // Default 4:3 aspect ratio for WMFs
+    const svgW = availW;
+    const svgH = availW * 0.75;
+    const fitScale = Math.min(availW / svgW, availH / svgH);
+    const containerW = svgW * fitScale;
+    const containerH = svgH * fitScale;
+    svgContainer.style.width = containerW + 'px';
+    svgContainer.style.height = containerH + 'px';
+    zoomScale = 1;
+    panX = (canvasRect.width - containerW) / 2;
+    panY = (canvasRect.height - containerH) / 2;
+    applyTransform();
+  }
+
+  function applyTransform() {
+    svgContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+    zoomLabel.textContent = Math.round(zoomScale * 100) + '%';
+  }
+
+  function zoomAtPoint(delta, cx, cy) {
+    const oldScale = zoomScale;
+    zoomScale *= delta > 0 ? 1.15 : 1 / 1.15;
+    zoomScale = Math.max(0.1, Math.min(20, zoomScale));
+    // Adjust pan so zoom centres on cursor position
+    const ratio = zoomScale / oldScale;
+    panX = cx - ratio * (cx - panX);
+    panY = cy - ratio * (cy - panY);
+    applyTransform();
+  }
+
+  canvasEl.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = canvasEl.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    zoomAtPoint(-e.deltaY, cx, cy);
+  }, { passive: false });
+
+  // Pan with middle-click or space+drag
+  let spaceHeld = false;
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !e.repeat && document.activeElement.tagName !== 'INPUT') {
+      spaceHeld = true;
+      canvasEl.style.cursor = 'grab';
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') {
+      spaceHeld = false;
+      if (!isPanning) canvasEl.style.cursor = '';
+    }
+  });
+
+  let dragStartX = 0, dragStartY = 0;
+  let didDrag = false;
+
+  canvasEl.addEventListener('mousedown', (e) => {
+    if (e.button === 0 || e.button === 1) {
+      // Start potential pan (left or middle button)
+      isPanning = true;
+      didDrag = false;
+      panStartX = e.clientX - panX;
+      panStartY = e.clientY - panY;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      if (e.button === 1 || spaceHeld) {
+        canvasEl.classList.add('panning');
+        e.preventDefault();
+      }
+    }
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isPanning) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (!didDrag && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      didDrag = true;
+      canvasEl.classList.add('panning');
+    }
+    if (didDrag) {
+      panX = e.clientX - panStartX;
+      panY = e.clientY - panStartY;
+      applyTransform();
+    }
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    if (isPanning) {
+      isPanning = false;
+      canvasEl.classList.remove('panning');
+      canvasEl.style.cursor = spaceHeld ? 'grab' : '';
+    }
+  });
+
+  // Toolbar zoom buttons
+  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+    const rect = canvasEl.getBoundingClientRect();
+    zoomAtPoint(1, rect.width / 2, rect.height / 2);
+  });
+  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+    const rect = canvasEl.getBoundingClientRect();
+    zoomAtPoint(-1, rect.width / 2, rect.height / 2);
+  });
+  document.getElementById('btn-zoom-fit').addEventListener('click', fitToCanvas);
+
+  // ── Init ──────────────────────────────────────────────────
+  async function init() {
+    await openDB();
+    const data = await loadActivities();
+    buildSidebar(data);
+    buildPalette();
+    fitToCanvas();
+  }
+
+  init().catch(err => {
+    console.error('Editor init failed:', err);
+    document.body.innerHTML = '<p style="color:red;padding:20px;">Failed to initialize: ' + err.message + '</p>';
+  });
+})();
+</script>
+</body>
+</html>

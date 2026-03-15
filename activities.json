@@ -1,0 +1,201 @@
+{
+  "palette": [
+    "#ff0000", "#00ff00", "#0000ff", "#ffff00",
+    "#ff00ff", "#00ffff", "#ffffff", "#000000"
+  ],
+  "categories": [
+    {
+      "name": "Scenes",
+      "slug": "scenes",
+      "icon": "img/icons/scenes.png",
+      "scenes": [
+        { "name": "Bathroom", "wmf": "wmf/scenes/bathroom.wmf" },
+        { "name": "Beach", "wmf": "wmf/scenes/beach.wmf" },
+        { "name": "Boat", "wmf": "wmf/scenes/boat.wmf" },
+        { "name": "Camel", "wmf": "wmf/scenes/camel.wmf" },
+        { "name": "Car", "wmf": "wmf/scenes/car.wmf" },
+        { "name": "Circus", "wmf": "wmf/scenes/circus.wmf" },
+        { "name": "Dino", "wmf": "wmf/scenes/dino.wmf" },
+        { "name": "Farm", "wmf": "wmf/scenes/farm.wmf" },
+        { "name": "Garden", "wmf": "wmf/scenes/garden.wmf" },
+        { "name": "Jungle", "wmf": "wmf/scenes/jungle.wmf" },
+        { "name": "Lounge", "wmf": "wmf/scenes/lounge.wmf" },
+        { "name": "Native US", "wmf": "wmf/scenes/nativeUS.wmf" },
+        { "name": "Park", "wmf": "wmf/scenes/park.wmf" },
+        { "name": "Sea", "wmf": "wmf/scenes/sea.wmf" },
+        { "name": "Ski", "wmf": "wmf/scenes/ski.wmf" },
+        { "name": "Space", "wmf": "wmf/scenes/space.wmf" },
+        { "name": "Street", "wmf": "wmf/scenes/street.wmf" },
+        { "name": "Witch", "wmf": "wmf/scenes/witch.wmf" }
+      ],
+      "sounds": {
+        "0": "snd/scenes/s0.wav", "1": "snd/scenes/s1.wav",
+        "2": "snd/scenes/s2.wav", "3": "snd/scenes/s3.wav",
+        "4": "snd/scenes/s4.wav", "5": "snd/scenes/s5.wav",
+        "6": "snd/scenes/s6.wav", "7": "snd/scenes/s7.wav"
+      }
+    },
+    {
+      "name": "Simple",
+      "slug": "simple",
+      "icon": "img/icons/simple.png",
+      "scenes": [
+        { "name": "Balloons", "wmf": "wmf/simple/BALLOONS.WMF" },
+        { "name": "Butterfly", "wmf": "wmf/simple/BUTTERFL.WMF" },
+        { "name": "Car", "wmf": "wmf/simple/Car2.wmf" },
+        { "name": "Die", "wmf": "wmf/simple/DIE.WMF" },
+        { "name": "Elephant", "wmf": "wmf/simple/ELEPHANT.WMF" },
+        { "name": "House", "wmf": "wmf/simple/HOUSE.WMF" },
+        { "name": "Kite", "wmf": "wmf/simple/KITE2.WMF" },
+        { "name": "Plane", "wmf": "wmf/simple/PLANE.WMF" },
+        { "name": "Pram", "wmf": "wmf/simple/PRAM2.WMF" },
+        { "name": "Sunshine", "wmf": "wmf/simple/SUNSHINE.WMF" },
+        { "name": "T-Shirt", "wmf": "wmf/simple/TEESHIRT.WMF" },
+        { "name": "Toadstool", "wmf": "wmf/simple/TOADSTOO.WMF" },
+        { "name": "Turtle", "wmf": "wmf/simple/TURTLE.WMF" },
+        { "name": "Van", "wmf": "wmf/simple/VAN.WMF" },
+        { "name": "Bus", "wmf": "wmf/simple/bus.wmf" },
+        { "name": "Teddy", "wmf": "wmf/simple/teddy2.wmf" }
+      ],
+      "sounds": {
+        "0": "snd/simple/e0.wav", "1": "snd/simple/e1.wav",
+        "2": "snd/simple/e2.wav", "3": "snd/simple/e3.wav",
+        "4": "snd/simple/e4.wav", "5": "snd/simple/e5.wav",
+        "6": "snd/simple/e6.wav", "7": "snd/simple/e7.wav"
+      }
+    },
+    {
+      "name": "Tessellation",
+      "slug": "tessellation",
+      "icon": "img/icons/tessellation.png",
+      "scenes": [
+        { "name": "Tess 2", "wmf": "wmf/tessellation/TESS2.WMF" },
+        { "name": "Tess 3", "wmf": "wmf/tessellation/TESS3.WMF" },
+        { "name": "Tess 4", "wmf": "wmf/tessellation/TESS4.WMF" },
+        { "name": "Tess 5", "wmf": "wmf/tessellation/TESS5.WMF" },
+        { "name": "Tess 6", "wmf": "wmf/tessellation/TESS6.WMF" },
+        { "name": "Tess 7", "wmf": "wmf/tessellation/TESS7.WMF" },
+        { "name": "Tess 8", "wmf": "wmf/tessellation/TESS8.WMF" },
+        { "name": "Tess 9", "wmf": "wmf/tessellation/TESS9.WMF" },
+        { "name": "Ba", "wmf": "wmf/tessellation/ba.wmf" }
+      ],
+      "sounds": {
+        "0": "snd/tessellation/n0.wav", "1": "snd/tessellation/n1.wav",
+        "2": "snd/tessellation/n2.wav", "3": "snd/tessellation/n3.wav",
+        "4": "snd/tessellation/n4.wav", "5": "snd/tessellation/n5.wav",
+        "6": "snd/tessellation/n6.wav", "7": "snd/tessellation/n7.wav"
+      }
+    },
+    {
+      "name": "Wierd",
+      "slug": "wierd",
+      "icon": "img/icons/wierd.png",
+      "scenes": [
+        { "name": "A", "wmf": "wmf/wierd/A.WMF" },
+        { "name": "B", "wmf": "wmf/wierd/B.WMF" },
+        { "name": "C", "wmf": "wmf/wierd/C.WMF" },
+        { "name": "D", "wmf": "wmf/wierd/D.WMF" },
+        { "name": "E", "wmf": "wmf/wierd/E.WMF" },
+        { "name": "F", "wmf": "wmf/wierd/F.WMF" },
+        { "name": "Pattern 1", "wmf": "wmf/wierd/PATTERN1.WMF" },
+        { "name": "Pattern 2", "wmf": "wmf/wierd/PATTERN2.WMF" }
+      ],
+      "sounds": {
+        "0": "snd/wierd/d0.wav", "1": "snd/wierd/d1.wav",
+        "2": "snd/wierd/d2.wav", "3": "snd/wierd/d3.wav",
+        "4": "snd/wierd/d4.wav", "5": "snd/wierd/d5.wav",
+        "6": "snd/wierd/d6.wav", "7": "snd/wierd/d7.wav"
+      }
+    },
+    {
+      "name": "Animals",
+      "slug": "animals",
+      "icon": "img/icons/animals.png",
+      "scenes": [
+        { "name": "Ape", "wmf": "wmf/animals/APE.WMF" },
+        { "name": "Beaver", "wmf": "wmf/animals/BEAVER_C.WMF" },
+        { "name": "Bird", "wmf": "wmf/animals/bird.wmf" },
+        { "name": "Dragon", "wmf": "wmf/animals/DRAGON_C.WMF" },
+        { "name": "Giraffe", "wmf": "wmf/animals/GIRAFF_C.WMF" },
+        { "name": "Pelican", "wmf": "wmf/animals/PELI_C.WMF" },
+        { "name": "Sea Lion", "wmf": "wmf/animals/SEALION.WMF" },
+        { "name": "Shark", "wmf": "wmf/animals/SHARK.WMF" },
+        { "name": "Vulture", "wmf": "wmf/animals/VULTURE.WMF" }
+      ],
+      "sounds": {
+        "0": "snd/simple/e0.wav", "1": "snd/simple/e1.wav",
+        "2": "snd/simple/e2.wav", "3": "snd/simple/e3.wav",
+        "4": "snd/simple/e4.wav", "5": "snd/simple/e5.wav",
+        "6": "snd/simple/e6.wav", "7": "snd/simple/e7.wav"
+      }
+    },
+    {
+      "name": "Fantasy",
+      "slug": "fantasy",
+      "icon": "img/icons/fantasy.png",
+      "scenes": [
+        { "name": "Animal 1", "wmf": "wmf/fantasy/Animal1.wmf" },
+        { "name": "Animal 2", "wmf": "wmf/fantasy/Animal2.wmf" },
+        { "name": "Animal 3", "wmf": "wmf/fantasy/Animal3.wmf" },
+        { "name": "Animal 4", "wmf": "wmf/fantasy/Animal4.wmf" },
+        { "name": "Bird", "wmf": "wmf/fantasy/Bird.wmf" },
+        { "name": "Dino", "wmf": "wmf/fantasy/Dino.wmf" },
+        { "name": "Dragon", "wmf": "wmf/fantasy/Dragon.wmf" },
+        { "name": "Dragon 2", "wmf": "wmf/fantasy/Dragon2.wmf" },
+        { "name": "Running", "wmf": "wmf/fantasy/Running.wmf" },
+        { "name": "Snake", "wmf": "wmf/fantasy/Snake.wmf" }
+      ],
+      "sounds": {
+        "0": "snd/wierd/d0.wav", "1": "snd/wierd/d1.wav",
+        "2": "snd/wierd/d2.wav", "3": "snd/wierd/d3.wav",
+        "4": "snd/wierd/d4.wav", "5": "snd/wierd/d5.wav",
+        "6": "snd/wierd/d6.wav", "7": "snd/wierd/d7.wav"
+      }
+    },
+    {
+      "name": "Young",
+      "slug": "young",
+      "icon": "img/icons/young.png",
+      "scenes": [
+        { "name": "Boy", "wmf": "wmf/young/Boy.wmf" },
+        { "name": "Cottage", "wmf": "wmf/young/Cottage.wmf" },
+        { "name": "Curls", "wmf": "wmf/young/Curls.wmf" },
+        { "name": "Dog", "wmf": "wmf/young/Dog.wmf" },
+        { "name": "Duck", "wmf": "wmf/young/Duck.wmf" },
+        { "name": "Girl", "wmf": "wmf/young/Girl.wmf" },
+        { "name": "Jumper", "wmf": "wmf/young/Jumper.wmf" },
+        { "name": "Lion", "wmf": "wmf/young/Lion.wmf" },
+        { "name": "Old Castle", "wmf": "wmf/young/Old Castle.wmf" },
+        { "name": "Pig", "wmf": "wmf/young/Pig.wmf" },
+        { "name": "Round Ball", "wmf": "wmf/young/Round ball.wmf" },
+        { "name": "Sail", "wmf": "wmf/young/Sail.wmf" },
+        { "name": "Teepee", "wmf": "wmf/young/Teepee.wmf" },
+        { "name": "Tiger", "wmf": "wmf/young/Tiger.wmf" }
+      ],
+      "sounds": {
+        "0": "snd/simple/e0.wav", "1": "snd/simple/e1.wav",
+        "2": "snd/simple/e2.wav", "3": "snd/simple/e3.wav",
+        "4": "snd/simple/e4.wav", "5": "snd/simple/e5.wav",
+        "6": "snd/simple/e6.wav", "7": "snd/simple/e7.wav"
+      }
+    },
+    {
+      "name": "Zap Kids",
+      "slug": "zapkids",
+      "icon": "img/icons/zapkids.png",
+      "scenes": [
+        { "name": "Kid 3", "wmf": "wmf/zapkids/Kid3.wmf" },
+        { "name": "Kid 4", "wmf": "wmf/zapkids/Kid4.wmf" },
+        { "name": "Kid 5", "wmf": "wmf/zapkids/Kid5.wmf" },
+        { "name": "Kid 6", "wmf": "wmf/zapkids/Kid6.wmf" },
+        { "name": "Kid 7", "wmf": "wmf/zapkids/Kid7.wmf" }
+      ],
+      "sounds": {
+        "0": "snd/wierd/d0.wav", "1": "snd/wierd/d1.wav",
+        "2": "snd/wierd/d2.wav", "3": "snd/wierd/d3.wav",
+        "4": "snd/wierd/d4.wav", "5": "snd/wierd/d5.wav",
+        "6": "snd/wierd/d6.wav", "7": "snd/wierd/d7.wav"
+      }
+    }
+  ]
+}

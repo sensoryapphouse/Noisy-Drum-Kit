@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noisy Colouring Book - Help</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: sans-serif; max-width: 700px; margin: 0 auto;
+      padding: 20px; background: #f5f5f5; color: #333; line-height: 1.6;
+    }
+    h1 { color: #2d2d8a; margin-bottom: 8px; }
+    h2 { color: #2a6b3f; margin-top: 24px; margin-bottom: 8px; border-bottom: 2px solid #4db86a; padding-bottom: 4px; }
+    h3 { color: #2d5a8a; margin-top: 16px; margin-bottom: 4px; }
+    p { margin-bottom: 10px; }
+    ul { margin-left: 20px; margin-bottom: 10px; }
+    li { margin-bottom: 4px; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+    th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+    th { background: #2d5a8a; color: #fff; }
+    td:first-child { font-weight: bold; white-space: nowrap; }
+    .tip { background: #e8f5e9; border-left: 4px solid #4db86a; padding: 10px 14px; margin: 12px 0; border-radius: 4px; }
+    .section-icon { font-size: 1.2em; margin-right: 6px; }
+    code { background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-size: 0.95em; }
+    .back-link { display: inline-block; margin-top: 20px; color: #2d2d8a; text-decoration: none; font-weight: bold; }
+    .back-link:hover { text-decoration: underline; }
+    footer { margin-top: 30px; padding-top: 12px; border-top: 1px solid #ccc; font-size: 0.85em; color: #666; }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="back-link">&larr; Back</a>
+<h1>Noisy Colouring Book</h1>
+<p>An interactive colouring book with sounds for children. Choose a picture, pick colours, and tap shapes to fill them in. Every colour plays its own sound!</p>
+
+<h2>Getting Started</h2>
+<ol>
+  <li>Choose a <strong>category</strong> from the start screen (Scenes, Simple, Animals, etc.).</li>
+  <li>The first picture in that category loads automatically.</li>
+  <li>Tap or click on a <strong>colour</strong> in the palette on the right.</li>
+  <li>Tap or click on any <strong>shape</strong> in the picture to fill it with that colour.</li>
+  <li>When all shapes are coloured, a celebration appears!</li>
+</ol>
+
+<h2>Categories</h2>
+<ul>
+  <li><strong>Scenes</strong> &ndash; 18 detailed scenes (beach, farm, jungle, space, etc.)</li>
+  <li><strong>Simple</strong> &ndash; 16 simple shapes for younger children (balloons, car, elephant, etc.)</li>
+  <li><strong>Tessellation</strong> &ndash; 9 geometric tessellation patterns with musical sounds</li>
+  <li><strong>Wierd</strong> &ndash; 9 unusual abstract patterns with musical sounds</li>
+  <li><strong>Animals</strong> &ndash; 9 real animals (ape, giraffe, shark, etc.)</li>
+  <li><strong>Fantasy</strong> &ndash; 10 magical creatures (dragons, dinosaurs, unicorns, etc.)</li>
+  <li><strong>Young</strong> &ndash; 14 friendly pictures (boy, dog, lion, castle, etc.)</li>
+  <li><strong>Zap Kids</strong> &ndash; 5 fun character pictures</li>
+</ul>
+
+<h2>The Palette Bar</h2>
+<p>The palette bar is on the right side of the screen. From top to bottom:</p>
+<ul>
+  <li><strong>Colour buttons</strong> (8 colours) &ndash; tap to select a colour. The selected colour has a white border.</li>
+  <li><strong>Current colour strip</strong> &ndash; a thin strip showing which colour is selected.</li>
+  <li><strong>Tool buttons</strong> &ndash; described below.</li>
+</ul>
+
+<h2>Buttons</h2>
+<table>
+  <tr><th>Button</th><th>Location</th><th>Action</th></tr>
+  <tr><td>Home</td><td>Top-left</td><td>Returns to the start screen.</td></tr>
+  <tr><td>Sound</td><td>Top-right</td><td>Toggles sound on or off.</td></tr>
+  <tr><td>Undo</td><td>Palette bar</td><td>Restores the picture to the state before your last colour fill.</td></tr>
+  <tr><td>Load Picture</td><td>Palette bar</td><td>Opens the picture chooser to switch to a different picture.</td></tr>
+  <tr><td>Clear</td><td>Palette bar</td><td>Resets all shapes back to white (you can undo this).</td></tr>
+</table>
+
+<h2>Sounds</h2>
+<p>Each colour plays a unique sound when you fill a shape. Different categories have different sound sets:</p>
+<ul>
+  <li><strong>Scenes</strong> &ndash; various fun sound effects</li>
+  <li><strong>Simple, Animals, Young</strong> &ndash; playful electronic sounds</li>
+  <li><strong>Tessellation</strong> &ndash; musical notes</li>
+  <li><strong>Wierd, Fantasy, Zap Kids</strong> &ndash; musical melodies</li>
+</ul>
+<p>Hovering over palette colours also plays their sound as a preview.</p>
+
+<h2>Keyboard Shortcuts</h2>
+<table>
+  <tr><th>Key</th><th>Action</th></tr>
+  <tr><td><code>0</code> to <code>7</code></td><td>Select colour 1 to 8</td></tr>
+  <tr><td><code>Ctrl-Z</code> / <code>Delete</code></td><td>Undo last fill</td></tr>
+  <tr><td><code>Enter</code></td><td>Clear all shapes to white</td></tr>
+  <tr><td><code>F2</code></td><td>Toggle sound on/off</td></tr>
+  <tr><td><code>+</code></td><td>Open picture chooser</td></tr>
+  <tr><td><code>Escape</code></td><td>Go back to the start screen</td></tr>
+</table>
+
+<h2>Rewards</h2>
+<p>When you colour <strong>every shape</strong> in a picture (no white shapes remaining), a celebration animation appears with falling coloured stars and a "Well Done!" message. Tap anywhere or wait a few seconds to dismiss it and continue colouring.</p>
+
+<h2>Accessibility</h2>
+<ul>
+  <li>Works with mouse, touchscreen, and keyboard.</li>
+  <li>All buttons have descriptive labels for screen readers.</li>
+  <li>Keyboard shortcuts allow full control without a mouse.</li>
+  <li>High contrast palette colours are easy to distinguish.</li>
+</ul>
+
+<h2>Tips</h2>
+<div class="tip">
+  <ul style="margin-bottom:0">
+    <li>Use keyboard numbers <code>0-7</code> for quick colour switching.</li>
+    <li>If you make a mistake, press <code>Ctrl-Z</code> to undo immediately.</li>
+    <li>Try the Tessellation and Wierd categories to make music while colouring!</li>
+    <li>Your colouring is saved automatically and shown in the picture chooser.</li>
+  </ul>
+</div>
+
+<a class="back-link" href="index.html">&larr; Back to Noisy Colouring Book</a>
+
+<footer>
+  Noisy Colouring Book &copy; Sensory App House. Web version 2.0.
+</footer>
+
+</body>
+</html>
